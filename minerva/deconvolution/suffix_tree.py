@@ -28,7 +28,9 @@ class SuffixTree:
 
 
 	def build_tree(self, read):
-		active = [self.root, None, 0]
+		aNode = self.root
+		aEdge = None 
+		aPos = 0
 		# rem = 0
 		# end = -1
 		# #primary steps, i.e no repeats of characters. The easy part
@@ -55,26 +57,53 @@ class SuffixTree:
 				elif checking_string[0] == 'g':
 					edge_label = 3
 				# print(edge_label)
-				if active[0] == self.root and active[1] == None and active[2] == 0:
-					if cursor.atcg[edge_label][0] == None and cursor.atcg[edge_label][1] == None:
-						cursor.atcg[edge_label] = [[0, self.end], None]
+				if aNode == self.root and aEdge == None and aPos == 0:
+					if aNode.atcg[edge_label][0] == None and aNode.atcg[edge_label][1] == None:
+						aNode.atcg[edge_label] = [[i, self.end], None]
 						rem -= 1
-					elif cursor.atcg[edge_label][0] != None:
-						active = [self.root, cursor.atcg[edge_label], 1]
-						rem +=1
+					elif aNode.atcg[edge_label][0] != None:
+						aNode = self.root
+						aEdge = aNode.atcg[edge_label]
+						aPos = 1
 						break
 				else:
 					print(active)
-					if read[active[1][0][0]+active[2]] == checking_string[0]:
-						active[2] += 1
-						rem +=1
+					if read[aEdge[0][0]+aPos] == checking_string[0]:
+						aPos += 1
 						break  
+					else:
+						print(rem)
+						for k in range(rem, 0, -1):
+							print(k)
+							inserting_prefix = read[i-k+1:i+1]
+							print("inserting prefix:", inserting_prefix)
+							new_edge_label = 0:
+								if inserting_prefix[-1] == 't':
+									new_edge_label = 1
+								elif inserting_prefix[-1] == 'c':
+									new_edge_label = 2
+								elif inserting_prefix[-1] == 'g':
+									new_edge_label = 3
+							if inserting_prefix[0] == aEdge[0][0]:
+								#create internal node
+								aEdge[1] = Node()
+								aEdge[1].atcg[new_edge_label] = [[i, self.end], None]
+								aEdge[1].atcg[read[aEdge[0][0]+aPos]] = [aEdge[0][0]+aPos, aEdge[0][1], None]
+								aPos -= 1
+								aEdge = aNode.atcg[inserting_prefix[1]]
+							
+
+
+							print("inserting prefix:", inserting_prefix)
+
+							rem -= 1
+
 		print("rem:", rem)
 			
 			
 
 
 end = End()
-tree = SuffixTree("atcgat", end)
+tree = SuffixTree("atcgatg", end)
 print(tree.root.atcg)
 
