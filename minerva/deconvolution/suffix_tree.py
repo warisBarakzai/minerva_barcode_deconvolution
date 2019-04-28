@@ -28,7 +28,7 @@ class SuffixTree:
 
 
 	def build_tree(self, read):
-		# active = (self.root, None, 0)
+		active = [self.root, None, 0]
 		# rem = 0
 		# end = -1
 		# #primary steps, i.e no repeats of characters. The easy part
@@ -54,15 +54,27 @@ class SuffixTree:
 					edge_label = 2
 				elif checking_string[0] == 'g':
 					edge_label = 3
-				print(edge_label)
-				if cursor.atcg[edge_label][0] == None and cursor.atcg[edge_label][1] == None:
-					cursor.atcg[edge_label] = [[0, self.end], None]
-					rem = 0
+				# print(edge_label)
+				if active[0] == self.root and active[1] == None and active[2] == 0:
+					if cursor.atcg[edge_label][0] == None and cursor.atcg[edge_label][1] == None:
+						cursor.atcg[edge_label] = [[0, self.end], None]
+						rem -= 1
+					elif cursor.atcg[edge_label][0] != None:
+						active = [self.root, cursor.atcg[edge_label], 1]
+						rem +=1
+						break
+				else:
+					print(active)
+					if read[active[1][0][0]+active[2]] == checking_string[0]:
+						active[2] += 1
+						rem +=1
+						break  
+		print("rem:", rem)
 			
 			
 
 
 end = End()
-tree = SuffixTree("atcg", end)
+tree = SuffixTree("atcgat", end)
 print(tree.root.atcg)
 
