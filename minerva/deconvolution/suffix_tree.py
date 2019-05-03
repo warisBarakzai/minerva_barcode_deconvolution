@@ -42,7 +42,6 @@ class SuffixTree:
 		aNode = self.root
 		aEdge = None 
 		aPos = 0
-		cursor = self.root
 		rem = 0
 		for i in range(len(read)):
 			print("rem:", rem)
@@ -51,6 +50,8 @@ class SuffixTree:
 			edge_label = self.get_index(checking_string[0])
 			rem += 1
 			self.end.val += 1
+			first = False
+			preNode = None
 			# Start the Phase
 			while rem > 0:
 				if aPos == 0:
@@ -71,7 +72,6 @@ class SuffixTree:
 							aPos = 1
 							break
 					elif read[aEdge[0][0]+aPos] == checking_string[0]:
-						print("22222222 read:", read[aEdge[0][0]+aPos], "OG:", checking_string[0])
 						aPos += 1
 						break  
 					# Commented code - This is never going to happen because if the second is end Edge+position < end
@@ -82,59 +82,50 @@ class SuffixTree:
 					# 		aEdge = aNode.atcg[checking_edge_label]
 					# 		aPos = 1
 					# 		break
-					first = False
-					continue_on = False
-					preNode = None
-					# for k in range(rem, 0, -1):
-					inserting_prefix = read[i-rem+1:i+1]
-					print("inserting prefix:", inserting_prefix)
-					new_edge_label = self.get_index(inserting_prefix[-1])
-
-
-					if read[aEdge[0][0]+aPos] != inserting_prefix[0]:
-						#create internal node
-						aEdge[1] = Node()
-						aEdge[1].atcg[new_edge_label] = [[i, self.end], None]
-						branch_edge_label = self.get_index(read[aEdge[0][0]+aPos])
-						aEdge[1].atcg[branch_edge_label] = [[aEdge[0][0]+aPos, aEdge[0][1]], None]
-						aPos -= 1
-						aEdge[0] = [aEdge[0][0], aEdge[0][0]+aPos]
-						if(first == False):
-							first = True
-							prevNode = aEdge[1]
-						else:
-							aEdge[1].suffixLink = prevNode
-							prevNode = aEdge[1]
-						if aNode != self.root and aNode.suffixLink != None:
-							aNode = aNode.suffixLink
-						elif aNode !=self.root and aNode.suffixLink == None:
-							aNode = self.root
-							switchup_edge_label = self.get_index(read[aEdge[0][0]])
-							aEdge = aNode.atcg[switchup_edge_label]
-						elif aNode == self.root:
-							new_active_edge = self.get_index(inserting_prefix[1])
-							aEdge = aNode.atcg[new_active_edge]
-					elif read[aEdge[0][0]+aPos] == inserting_prefix[0]:
-						continue_on = True
-						break
-
-
-					elif aEdge[0] == None:
-						aEdge[0] = [i, self.end]
-					rem -= 1
-					if(continue_on == True):
-						break
 					else:
-						aNode = self.root
-						aEdge = None 
-						aPos = 0
+						# for k in range(rem, 0, -1):
+						inserting_prefix = read[i-rem+1:i+1]
+						print("inserting prefix:", inserting_prefix)
+						new_edge_label = self.get_index(inserting_prefix[-1])
+						# This shouldn't be in an if loop...
+						if read[aEdge[0][0]+aPos] != inserting_prefix[0]:
+							#create internal node
+							aEdge[1] = Node()
+							aEdge[1].atcg[new_edge_label] = [[i, self.end], None]
+							branch_edge_label = self.get_index(read[aEdge[0][0]+aPos])
+							aEdge[1].atcg[branch_edge_label] = [[aEdge[0][0]+aPos, aEdge[0][1]], None]
+							aPos -= 1
+							aEdge[0] = [aEdge[0][0], aEdge[0][0]+aPos]
+							if(first == False):
+								first = True
+								prevNode = aEdge[1]
+							else:
+								aEdge[1].suffixLink = prevNode
+								prevNode = aEdge[1]
+							if aNode != self.root and aNode.suffixLink != None:
+								aNode = aNode.suffixLink
+							elif aNode !=self.root and aNode.suffixLink == None:
+								aNode = self.root
+								switchup_edge_label = self.get_index(read[aEdge[0][0]])
+								aEdge = aNode.atcg[switchup_edge_label]
+							elif aNode == self.root:
+								new_active_edge = self.get_index(inserting_prefix[1])
+								aEdge = aNode.atcg[new_active_edge]
+						elif read[aEdge[0][0]+aPos] == inserting_prefix[0]:
+							continue_on = True
+							break
+						rem -= 1
+						if(rem == 1):
+							aNode = self.root
+							aEdge = None 
+							aPos = 0
 
-		print("rem:", rem)
+		print("final rem:", rem)
 			
 			
 
 
 end = End()
-tree = SuffixTree("atgcatg", end)
+tree = SuffixTree("atgatgcatgcatgactgac", end)
 print(tree.root.atcg)
 
