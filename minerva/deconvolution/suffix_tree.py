@@ -30,14 +30,13 @@ class Node:
 		self.atcg = [[None, None], [None, None], [None, None], [None, None]]
 		# only four characters 
 		self.suffixLink = None
-		self.data = ""
 
 class SuffixTree:
 	def __init__(self, readList, End):
 		self.root = Node()
-		self.root.data = readList
 		self.end = End
 		self.build_tree(readList)
+		self.data = readList
 
 	def get_index(self, character):
 		if character == 'A':
@@ -49,17 +48,47 @@ class SuffixTree:
 		elif character == 'G':
 			return 3
 
-	def walk_dfs(self,current,visited=None,char=""):
+	def other_implementation(self, current, visited, depth = 0):
+		visited.add(current)
+		for i in range(len(current.atcg)):
+			if current == self.root:
+				depth = 0
+			if current.atcg[i][0] != None:
+				start, end = current.atcg[i][0][0], current.atcg[i][0][1] 
+				char ="Error"
+				if i == 0:
+					char = "A"
+				elif i == 1:
+					char = "T"
+				elif i == 2:
+					char = "C"
+				elif i == 3:
+					char = "G"
+				print("depth:" + str(depth) + '\t' + char + "\t", start,end, ":", self.data[start:end+1])
+				if current.atcg[i][1] != None:
+					depth += 1
+					self.other_implementation(current.atcg[i][1], visited, depth)
+
+
+
+	def walk_dfs(self, current, visited=None,char=""):
 		if visited is None:
 			visited = set()
 		visited.add(current)
 		counter = 0
 
 		while(  counter < len(current.atcg) and  current.atcg[counter][1] == None):
+			pew = 'A'
 			if(current.atcg[counter][0] != None):
-				start,end = current.atcg[counter][0][0],current.atcg[counter][0][1]
-				print(start,end)
-				print(current.data[start:end+1])
+				if counter == 1:
+					pew = 'T'
+				elif counter == 2:
+					pew = 'C'
+				elif counter == 3:
+					pew = 'G'
+
+				start,end = current.atcg[counter][0][0], current.atcg[counter][0][1]
+				print(pew + "\t", start,end, ":", current.data[start:end])
 				#while the next field is none, print all the suffixes before that
 				# print(current.atcg[counter])
 			counter += 1
@@ -72,7 +101,7 @@ class SuffixTree:
 				#store the current char (this part is incomplete it would be better to store a chararray)
 				# print(current.atcg[i][0],current.atcg[i][1])
 				# print(current.data[start:end+1])
-				self.walk_dfs(current.atcg[i][1],visited,char)
+				self.walk_dfs(current.atcg[i][1], visited,char)
 		return visited
 
 
@@ -82,7 +111,6 @@ class SuffixTree:
 		aPos = 0 # active position
 		rem = 0
 		for i in range(len(read)):
-			print("rem:", rem)
 			# print("Node:", aNode,"//Edge:", aEdge,"//Pos:", aPos)
 			checking_string = read[:i+1]
 			# print("checking_string",checking_string)
@@ -100,7 +128,6 @@ class SuffixTree:
 					if (aEdge == None or aEdge[0] == None) and aNode.atcg[edge_label][0] == None and aNode.atcg[edge_label][1] == None:
 						# active edge = none    and active node's current letter has not been initialized
 						# print("aedge[0] = ",aEdge[0])
-						print("aedge= " ,aEdge)
 						aNode.atcg[edge_label] = [[i, self.end], None] 
 						#initialize current letter new node
 						rem -= 1
@@ -112,7 +139,6 @@ class SuffixTree:
 						if  aEdge[0][1] != self.end and aEdge[0][0] + aPos > aEdge[0][1]:
 							#whats the point of checking [0][1] != end 
 							# edge + apos > edge[0][1] means not valid
-							print("aedge= " ,aEdge)
 							aNode = aEdge[1]
 
 							aEdge = None
@@ -121,7 +147,6 @@ class SuffixTree:
 						break
 					elif aEdge[0] != None:
 						#has been initialized
-						print("aedge= " ,aEdge)
 						aPos = 1
 						if  aEdge[0][1] != self.end and aEdge[0][0] + aPos > aEdge[0][1]:
 							#if this is not the last node and this is not the edge that we are looking for
@@ -149,7 +174,6 @@ class SuffixTree:
 					# 		break
 					else:
 						#  HAVE NO CODE FOR DEALING WITH SUFFIX LINKS AND NOT HAVING ROOT AS SUFFIXLINKS
-						print("aedge= " ,aEdge)
 						inserting_prefix = read[i-rem+1:i+1]
 						# print("inserting prefix:", inserting_prefix)
 						new_edge_label = self.get_index(inserting_prefix[-1])
@@ -157,9 +181,7 @@ class SuffixTree:
 						# if read[aEdge[0][0]+aPos] != inserting_prefix[-1]:
 						#create internal node
 						prev = aEdge[1]
-						print("prev:", prev)
 						aEdge[1] = Node()
-						aEdge[1].data = read
 						#creating a new node at active position
 						aEdge[1].atcg[new_edge_label] = [[i, self.end], None]
 						branch_edge_label = self.get_index(read[aEdge[0][0]+aPos])
@@ -167,7 +189,6 @@ class SuffixTree:
 						#changed second value from None to aEdge[1]
 						aPos -= 1
 						aEdge[0] = [aEdge[0][0], aEdge[0][0]+aPos]
-						print(aEdge)
 						if(first == False):
 							first = True
 							prevNode = aEdge[1]
@@ -186,15 +207,13 @@ class SuffixTree:
 						elif aNode == self.root:
 							new_active_edge = self.get_index(inserting_prefix[1])
 							aEdge = aNode.atcg[new_active_edge]
-						print("Before:", rem)
 						rem -= 1
 						if(rem == 0): # should be if rem == 0
 							aNode = self.root
 							aEdge = None 
 							aPos = 0
-						print("After:", rem)
 
-		# print("final rem:", rem)
+		print("final rem:", rem)
 
 			
 
@@ -203,13 +222,13 @@ end = End()
 tree = SuffixTree("ATCGTTCTGC", end)
 temp = tree.root.atcg
 print("display root",tree.root.atcg)
-print("display second node",tree.root.atcg[1][1].atcg)
-print("display second node",tree.root.atcg[2][1].atcg)
-print("display third node",tree.root.atcg[1][1].atcg[2][1].atcg)
-result = tree.walk_dfs(tree.root)
+# print("display second node",tree.root.atcg[1][1].atcg)
+# print("display second node",tree.root.atcg[2][1].atcg)
+# print("display third node",tree.root.atcg[1][1].atcg[2][1].atcg)
+result = tree.other_implementation(tree.root, set())
 counter = 0
-length = len(tree.root.data)
-print(len(tree.root.data))
+length = len(tree.data)
+print(len(tree.data))
 
 
 
