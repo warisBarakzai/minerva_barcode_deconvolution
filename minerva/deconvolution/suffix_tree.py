@@ -26,8 +26,8 @@ class End:  #define global end
 
 class Node:
 	def __init__(self):
-		#			  a(Edge, Node)  t 				c 			g 	 
-		self.atcg = [[None, None], [None, None], [None, None], [None, None]]
+		#			  a(Edge, Node)  t 				c 			g 	 			CHAR
+		self.atcg = [[None, None], [None, None], [None, None], [None, None], [None, None]]
 		# only four characters 
 		self.suffixLink = None
 
@@ -47,15 +47,16 @@ class SuffixTree:
 			return 2
 		elif character == 'G':
 			return 3
+		else:
+			return 4
 
 	def other_implementation(self, current, visited, depth = 0):
 		visited.add(current)
 		for i in range(len(current.atcg)):
-			if current == self.root:
-				depth = 0
+
 			if current.atcg[i][0] != None:
 				start, end = current.atcg[i][0][0], current.atcg[i][0][1] 
-				char ="Error"
+				char ="Terminator"
 				if i == 0:
 					char = "A"
 				elif i == 1:
@@ -68,6 +69,7 @@ class SuffixTree:
 				if current.atcg[i][1] != None:
 					depth += 1
 					self.other_implementation(current.atcg[i][1], visited, depth)
+					depth -= 1
 
 
 
@@ -131,6 +133,10 @@ class SuffixTree:
 						aNode.atcg[edge_label] = [[i, self.end], None] 
 						#initialize current letter new node
 						rem -= 1
+						if aNode != self.root:
+							aNode = self.root
+							aEdge = None
+							aPos = 0
 					elif (aEdge == None or aEdge[0] == None) and aNode.atcg[edge_label][0] != None:
 						# if node has been initialized  
 						aEdge = aNode.atcg[edge_label]
@@ -187,7 +193,9 @@ class SuffixTree:
 						branch_edge_label = self.get_index(read[aEdge[0][0]+aPos])
 						aEdge[1].atcg[branch_edge_label] = [[aEdge[0][0]+aPos, aEdge[0][1]], prev] 
 						#changed second value from None to aEdge[1]
+						# I dont think im supposed to update aPos just yet here.
 						aPos -= 1
+						print(aPos)
 						aEdge[0] = [aEdge[0][0], aEdge[0][0]+aPos]
 						if(first == False):
 							first = True
@@ -201,9 +209,12 @@ class SuffixTree:
 							linked_edge_label = self.get_index(read[aEdge[0][0]])
 							aEdge = aNode.atcg[linked_edge_label]
 						elif aNode !=self.root and aNode.suffixLink == None:
+							print("OEWOEWOWEOWE")
 							aNode = self.root
 							switchup_edge_label = self.get_index(read[aEdge[0][0]])
 							aEdge = aNode.atcg[switchup_edge_label]
+							aPos +=1
+							print("Here:", aPos, rem)
 						elif aNode == self.root:
 							new_active_edge = self.get_index(inserting_prefix[1])
 							aEdge = aNode.atcg[new_active_edge]
@@ -212,14 +223,14 @@ class SuffixTree:
 							aNode = self.root
 							aEdge = None 
 							aPos = 0
-
+		print("Apos:", aPos)
 		print("final rem:", rem)
 
 			
 
 
 end = End()
-tree = SuffixTree("ATCGTTCTGC", end)
+tree = SuffixTree("ATCGTTCTGC$", end)
 temp = tree.root.atcg
 print("display root",tree.root.atcg)
 # print("display second node",tree.root.atcg[1][1].atcg)
