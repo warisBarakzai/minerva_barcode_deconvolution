@@ -218,18 +218,29 @@ class SuffixTree:
 							prevNode = aEdge[1]
 
 						if aNode != self.root and aNode.suffixLink != None:
-							if read[aEdge[0][0]+aPos] == read[i]:
-								aPos += 1
-								if  aEdge[0][1] != self.end and aEdge[0][0] + aPos > aEdge[0][1]:
-									aNode = aEdge[1]
-									aEdge = None
-									aPos = 0
-								#hit rule stopper increment active position do nothing
-								break   
-							aNode = aNode.suffixLink
-							linked_edge_label = self.get_index(read[aEdge[0][0]])
-							aEdge = aNode.atcg[linked_edge_label]
 							aPos += 1
+							scanning_edge_label = self.get_index(read[aEdge[0][0]])
+							scanning_suffix = read[i-aPos:i+1]
+							print("scanning_suffix:", scanning_suffix)
+							# if read[aEdge[0][0]+aPos] == read[i]:
+							# 	aPos += 1
+							# 	if  aEdge[0][1] != self.end and aEdge[0][0] + aPos > aEdge[0][1]:
+							# 		aNode = aEdge[1]
+							# 		aEdge = None
+							# 		aPos = 0
+							# 	#hit rule stopper increment active position do nothing
+							# 	break   
+							aNode = aNode.suffixLink
+							aEdge = aNode.atcg[scanning_edge_label]
+							# Need to do a scan on the suffixLinked Edge
+							pew = 0
+							if aEdge[0] != None:
+								while aEdge[0][1] != self.end and aEdge[0][0] + aPos > aEdge[0][1]:
+									pew += aPos
+									aNode = aEdge[1]
+									pewpew = self.get_index(scanning_suffix[pew])
+									aPos -= (aEdge[0][1]-aEdge[0][0] + 1)
+									aEdge = aNode.atcg[pewpew]
 						elif aNode !=self.root and aNode.suffixLink == None:
 							aNode = self.root
 						if aNode == self.root:
@@ -255,7 +266,8 @@ class SuffixTree:
 
 end = End()
 # tree = SuffixTree("ATCGTTCTGC$", end)
-tree = SuffixTree("AATATATATTTTTATA$", end)
+tree = SuffixTree("ACCCGCCCCGCGCTT$", end)
+# ATTATATTATAAAAAAAAAATATTATTA
 
 temp = tree.root.atcg
 print("display root",tree.root.atcg)
