@@ -38,6 +38,21 @@ class SuffixTree:
 		self.end = End
 		self.build_tree(readList)
 		self.data = readList
+		self.add_endings()
+		self.build_tree(self.full_string())
+
+	def numReads(self):
+		return len(self.data)
+
+	def full_string(self):
+		return ''.join(self.data)	
+
+	def add_endings(self):
+		for i in range(len(self.data)):
+			if i+33 < 65:
+				self.data[i] += chr(i+33)
+			elif i+33 >= 65:
+				self.data[i] += chr(i+95)
 
 	def get_index(self, character):
 		if character == 'A':
@@ -219,9 +234,9 @@ class SuffixTree:
 
 						if aNode != self.root and aNode.suffixLink != None:
 							aPos += 1
-							scanning_edge_label = self.get_index(read[aEdge[0][0]])
-							scanning_suffix = read[i-aPos:i+1]
-							print("scanning_suffix:", scanning_suffix)
+							scanning_suffix = read[aEdge[0][0]:(aEdge[0][0] + aPos)] + read[i]
+							scanning_edge_label = self.get_index(scanning_suffix[0])
+							print("scanning_suffix:", scanning_suffix, aPos, read[aEdge[0][0]:aEdge[0][1]+1])
 							# if read[aEdge[0][0]+aPos] == read[i]:
 							# 	aPos += 1
 							# 	if  aEdge[0][1] != self.end and aEdge[0][0] + aPos > aEdge[0][1]:
@@ -233,14 +248,16 @@ class SuffixTree:
 							aNode = aNode.suffixLink
 							aEdge = aNode.atcg[scanning_edge_label]
 							# Need to do a scan on the suffixLinked Edge
-							pew = 0
+							pew = aPos
+							aPos = 0
 							if aEdge[0] != None:
-								while aEdge[0][1] != self.end and aEdge[0][0] + aPos > aEdge[0][1]:
-									pew += aPos
-									aNode = aEdge[1]
-									pewpew = self.get_index(scanning_suffix[pew])
-									aPos -= (aEdge[0][1]-aEdge[0][0] + 1)
-									aEdge = aNode.atcg[pewpew]
+								for k in range(len(scanning_suffix)-1):
+									if aPos + aEdge[0][0] == aEdge[0][1]:
+										aNode = aEdge[1]
+										aEdge = aEdge = aNode.atcg[self.get_index(scanning_suffix[k+1])]
+										aPos = 0
+									else:
+										aPos += 1
 						elif aNode !=self.root and aNode.suffixLink == None:
 							aNode = self.root
 						if aNode == self.root:
@@ -266,7 +283,7 @@ class SuffixTree:
 
 end = End()
 # tree = SuffixTree("ATCGTTCTGC$", end)
-tree = SuffixTree("ACCCGCCCCGCGCTT$", end)
+tree = SuffixTree("TCATTAGTCGGTTCATCTAAAAGGAGTACATTAAGTTTATGAACAAGTAAACGCAATAAATACAGACGCTTTTGTTCTCCCCCTGAGAGTTTATAAACTTTTTTACCGTGTGTAGCGCTCGGAAATA$", end)
 # ATTATATTATAAAAAAAAAATATTATTA
 
 temp = tree.root.atcg
