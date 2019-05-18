@@ -131,7 +131,7 @@ class SuffixTree:
 		for i in range(len(kmer)):
 			if aEdge[0] == None or string[aEdge[0][0] + aPos] != kmer[i]:
 				return False
-			elif aPos + aEdge[0][0] > aEdge[0][1]:
+			elif aEdge[0][1] != self.end and aPos + aEdge[0][0] > aEdge[0][1]:
 				aNode = aEdge[1]
 				aEdge = aNode.atcg[self.get_index(kmer[i])]
 			else:
