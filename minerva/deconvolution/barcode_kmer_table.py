@@ -1,5 +1,6 @@
 from minerva.gimmebio.kmers import MinSparseKmerSet
 from minerva.gimmebio.readclouds import iterReadClouds
+from minerva.deconvolution.suffix_tree import SuffixTree
 from itertools import combinations
 import numpy as np
 import sys
@@ -39,10 +40,13 @@ def parseBarcodes(filelike, K, W, dropout, verbose=False):
         if len(bc) < dropout: 
             continue
         readKmerSets = {}
+        readArray = []
         for rp in bc:
             seqs = [rp.r1.seq, rp.r2.seq]
+            readArray.append(rp.r1.seq)
+            readArray.append(rp.r2.seq)
             readKmerSets[rp.sid] = MinSparseKmerSet( K, W, seqs)
-        bcTbls.append( BarcodeTable(bc.barcode, readKmerSets))
+        bcTbls.append( BarcodeTable(bc.barcode, readKmerSets, readArray))
     if verbose:
         sys.stderr.write('\rparsed {:,} barcodes\n'.format(nBC))
     return bcTbls
@@ -53,7 +57,7 @@ def parseBarcodes(filelike, K, W, dropout, verbose=False):
 
 class BarcodeTable:
 
-    def __init__(self, barcode, readKmerSets):
+    def __init__(self, barcode, readKmerSets, readArray):
         self.barcode = barcode
         self.readKmerSets = readKmerSets
         self.reverseMap = None
@@ -62,6 +66,7 @@ class BarcodeTable:
         for rp, kmerSet in self.readKmerSets.items():
             for kmer in kmerSet:
                 self._allKmers.add(kmer)
+        self.tree = SuffixTree(readArray)
 
     def _buildReverseMap(self):
         self.reverseMap = {}
@@ -201,3 +206,10 @@ class BarcodeTable:
 
     def shape(self):
         return self.numRows(), self.numColumns()
+
+    def overlap(self, otherKmerSet):
+        count = 0
+        for kmer in otherKmerSet:
+            if self.tree.search(kmer):
+                count += 1
+        return count

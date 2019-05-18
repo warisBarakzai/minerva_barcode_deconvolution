@@ -33,10 +33,9 @@ class Node:
 		self.parent = parent
 
 class SuffixTree:
-	def __init__(self, readList, End):
+	def __init__(self, readList):
 		self.root = Node()
-		self.end = End
-		self.build_tree(readList)
+		self.end = End()
 		self.data = readList
 		self.add_endings()
 		self.build_tree(self.full_string())
@@ -66,7 +65,7 @@ class SuffixTree:
 		else:
 			return 4
 
-	def other_implementation(self, current, visited, depth = 0):
+	def other_implementation(self, current, visited, full_string,depth = 0):
 		visited.add(current)
 		for i in range(len(current.atcg)):
 
@@ -81,10 +80,10 @@ class SuffixTree:
 					char = "C"
 				elif i == 3:
 					char = "G"
-				print("depth:" + str(depth) + '\t' + char + "\t", start,end, ":", self.data[start:end+1])
+				print("depth:" + str(depth) + '\t' + char + "\t", start,end, ":", full_string[start:end+1])
 				if current.atcg[i][1] != None:
 					depth += 1
-					self.other_implementation(current.atcg[i][1], visited, depth)
+					self.other_implementation(current.atcg[i][1], visited, full_string, depth)
 					depth -= 1
 
 
@@ -121,6 +120,23 @@ class SuffixTree:
 				# print(current.data[start:end+1])
 				self.walk_dfs(current.atcg[i][1], visited,char)
 		return visited
+
+	def search(self, kmer):
+		if len(kmer) == 0:
+			return False
+		aNode = self.root
+		aPos = 0
+		aEdge = aNode.atcg[self.get_index(kmer[0])]
+		string = self.full_string()
+		for i in range(len(kmer)):
+			if aEdge[0] == None or string[aEdge[0][0] + aPos] != kmer[i]:
+				return False
+			elif aPos + aEdge[0][0] > aEdge[0][1]:
+				aNode = aEdge[1]
+				aEdge = aNode.atcg[self.get_index(kmer[i])]
+			else:
+				aPos += 1
+		return True
 
 
 	def build_tree(self, read):
@@ -275,26 +291,26 @@ class SuffixTree:
 							aNode = self.root
 							aEdge = None 
 							aPos = 0
-		print("Apos:", aPos)
-		print("final rem:", rem)
+		# print("Apos:", aPos)
+		# print("final rem:", rem)
 
 			
 
 
-end = End()
+# end = End()
 # tree = SuffixTree("ATCGTTCTGC$", end)
-tree = SuffixTree("TCATTAGTCGGTTCATCTAAAAGGAGTACATTAAGTTTATGAACAAGTAAACGCAATAAATACAGACGCTTTTGTTCTCCCCCTGAGAGTTTATAAACTTTTTTACCGTGTGTAGCGCTCGGAAATA$", end)
-# ATTATATTATAAAAAAAAAATATTATTA
+# tree = SuffixTree(["TCATTAGTCGGTTCATCTAAAAGGAGTACATTAAGTTTATGAACAAGTAAACGCAATAAATACAGACGCTTTTGTTCTCCCCCTGAGAGTTTATAAACTTTTTTACCGTGTGTAGCGCTCGGAAATA"])
+# # ATTATATTATAAAAAAAAAATATTATTA
 
-temp = tree.root.atcg
-print("display root",tree.root.atcg)
-# print("display second node",tree.root.atcg[1][1].atcg)
-# print("display second node",tree.root.atcg[2][1].atcg)
-# print("display third node",tree.root.atcg[1][1].atcg[2][1].atcg)
-result = tree.other_implementation(tree.root, set())
-counter = 0
-length = len(tree.data)
-print(len(tree.data))
+# temp = tree.root.atcg
+# print("display root",tree.root.atcg)
+# # print("display second node",tree.root.atcg[1][1].atcg)
+# # print("display second node",tree.root.atcg[2][1].atcg)
+# # print("display third node",tree.root.atcg[1][1].atcg[2][1].atcg)
+# result = tree.other_implementation(tree.root, set(),tree.full_string())
+# counter = 0
+# length = len(tree.data)
+# print(len(tree.data))
 
 
 

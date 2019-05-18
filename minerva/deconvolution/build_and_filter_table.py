@@ -19,7 +19,7 @@ def buildAndFilterTable( anchorTable, barcodeTables, args):
 
     nrow, ncol = anchorTable.shape()
     tableTooSmall = nrow < args.min_rows or ncol < args.min_cols
-    tableIsEmpty = nrow ==0 or ncol == 0
+    tableIsEmpty = (nrow ==0 or ncol == 0)
 
     if not tableIsEmpty:
         sys.stderr.write(' -> RF:' + str(anchorTable.shape()))
@@ -47,7 +47,7 @@ def buildTable(anchorTable, otherTables, args):
 def buildNewColumns(anchorTable, otherTable, args):
     kmerCounts = {}
     for anchorKmer in anchorTable.allKmers():
-        if otherTable.containsKmer(anchorKmer):
+        if otherTable.tree.search(anchorKmer):
             try:
                 kmerCounts[anchorKmer] += 1
             except KeyError:
